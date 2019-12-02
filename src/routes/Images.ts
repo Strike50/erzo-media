@@ -1,16 +1,12 @@
-import { UserDao } from '@daos';
 import { logger } from '@shared';
 import { Request, Response, Router } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
 import { paramMissingError } from '@shared';
 import { ParamsDictionary } from 'express-serve-static-core';
-import AWS, {AWSError} from 'aws-sdk';
-import S3, {GetObjectRequest} from 'aws-sdk/clients/s3';
-import {GetObjectResponse} from 'aws-sdk/clients/mediastoredata';
+import S3 from 'aws-sdk/clients/s3';
 import {uuid} from 'uuidv4';
 import multer from 'multer';
 import pkgcloud from 'pkgcloud';
-import fs from 'fs';
 
 const upload = multer({
     dest: 'upload/',
@@ -19,7 +15,6 @@ const upload = multer({
 
 // Init shared
 const router = Router();
-const userDao = new UserDao();
 
 const FOLDER = 'images';
 const BUCKET = process.env.SCALEWAY_BUCKET;
@@ -83,7 +78,7 @@ router.post('', upload.single('imagePosted'), async (req: Request, res: Response
     });
 
     writeStream.on('success', (file) => {
-        return res.status(OK).json({
+        return res.status(CREATED).json({
             contentId: filename,
         });
         // success, file will be a File model
@@ -105,7 +100,6 @@ router.put('/update', async (req: Request, res: Response) => {
             });
         }
         user.id = Number(user.id);
-        await userDao.update(user);
         return res.status(OK).end();
     } catch (err) {
         logger.error(err.message, err);
@@ -122,7 +116,6 @@ router.put('/update', async (req: Request, res: Response) => {
 router.delete('/delete/:id', async (req: Request, res: Response) => {
     try {
         const { id } = req.params as ParamsDictionary;
-        await userDao.delete(Number(id));
         return res.status(OK).end();
     } catch (err) {
         logger.error(err.message, err);
