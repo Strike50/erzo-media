@@ -1,4 +1,3 @@
-import { UserDao } from '@daos';
 import { logger } from '@shared';
 import { Request, Response, Router, Express } from 'express';
 import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
