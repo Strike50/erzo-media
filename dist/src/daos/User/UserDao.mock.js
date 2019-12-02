@@ -1,0 +1,73 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const tslib_1 = require("tslib");
+const _shared_1 = require("@shared");
+const MockDao_mock_1 = require("../MockDb/MockDao.mock");
+class UserDao extends MockDao_mock_1.MockDaoMock {
+    getAll() {
+        const _super = name => super[name];
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const db = yield _super("openDb").call(this);
+                return db.users;
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    add(user) {
+        const _super = name => super[name];
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const db = yield _super("openDb").call(this);
+                user.id = _shared_1.getRandomInt();
+                db.users.push(user);
+                yield _super("saveDb").call(this, db);
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    update(user) {
+        const _super = name => super[name];
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const db = yield _super("openDb").call(this);
+                for (let i = 0; i < db.users.length; i++) {
+                    if (db.users[i].id === user.id) {
+                        db.users[i] = user;
+                        yield _super("saveDb").call(this, db);
+                        return;
+                    }
+                }
+                throw new Error('User not found');
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+    delete(id) {
+        const _super = name => super[name];
+        return tslib_1.__awaiter(this, void 0, void 0, function* () {
+            try {
+                const db = yield _super("openDb").call(this);
+                for (let i = 0; i < db.users.length; i++) {
+                    if (db.users[i].id === id) {
+                        db.users.splice(i, 1);
+                        yield _super("saveDb").call(this, db);
+                        return;
+                    }
+                }
+                throw new Error('User not found');
+            }
+            catch (err) {
+                throw err;
+            }
+        });
+    }
+}
+exports.UserDao = UserDao;
+//# sourceMappingURL=UserDao.mock.js.map
