@@ -1,6 +1,6 @@
 import { logger } from '@shared';
 import { Request, Response, Router } from 'express';
-import { BAD_REQUEST, CREATED, OK } from 'http-status-codes';
+import {BAD_REQUEST, CREATED, NO_CONTENT, OK} from 'http-status-codes';
 import { ParamsDictionary } from 'express-serve-static-core';
 import {uuid} from 'uuidv4';
 import multer from 'multer';
@@ -37,18 +37,12 @@ router.get('/:fileId', async (req: Request, res: Response) => {
             remote: fileId,
         });
         readStream.on('error', (err) => {
-            return res.status(BAD_REQUEST).json({
+            res.status(BAD_REQUEST).json({
                 error: err.message,
-            });
+            }).send();
         });
-        readStream.on('success', (file) => {
-            // tslint:disable-next-line:no-console
-            console.log(file);
-            return res.status(OK).json({
-                image: file,
-            });
-            // success, file will be a File model
-        });
+
+        readStream.pipe(res);
 });
 
 /******************************************************************************
@@ -65,16 +59,14 @@ router.post('', upload.single('imagePosted'), async (req: Request, res: Response
         remote: filename,
     });
     writeStream.on('error', (err) => {
-        return res.status(BAD_REQUEST).json({
+        res.status(BAD_REQUEST).json({
             error: err.message,
-        });
+        }).send();
     });
 
     writeStream.on('success', () => {
-        return res.status(CREATED).json({
-            contentId: filename,
-        });
-        // success, file will be a File model
+        res.status(CREATED).setHeader('Content-Location', filename);
+        res.send();
     });
     readStream.pipe(writeStream);
 });
@@ -85,12 +77,15 @@ router.post('', upload.single('imagePosted'), async (req: Request, res: Response
 
 router.delete('/:fileId', async (req: Request, res: Response) => {
     const { fileId } = req.params as ParamsDictionary;
-    CLIENT.removeFile(CONTAINER, fileId, (err) => {
-        return res.status(BAD_REQUEST).json({
-            error: err,
-        });
+    await CLIENT.removeFile(CONTAINER, fileId, (err) => {
+        if (err) {
+            res.status(BAD_REQUEST).json({
+                error: err,
+            }).send();
+        }
+        return res.status(NO_CONTENT).send();
     });
-    return res.status(OK).end();
+
 });
 
 /******************************************************************************
