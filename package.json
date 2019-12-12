@@ -4,9 +4,11 @@
   "scripts": {
     "build": "node ./util/build.js",
     "lint": "tslint --project \"tsconfig.json\"",
-    "start": "cross-env ENV_FILE=production node -r ./env -r module-alias/register ./dist/start.js",
+    "start": "npm run build && node -r module-alias/register ./dist/start.js",
     "start-dev": "nodemon --config \"./util/nodemon.json\"",
-    "test": "nodemon --config \"./util/nodemon.test.json\""
+    "test": "cross-env ENV_FILE=test ts-node -r ./env -r tsconfig-paths/register ./spec/start.ts",
+    "testgit": "ts-node -r tsconfig-paths/register ./spec/start.ts",
+    "sonar-scanner": "node_modules/sonar-scanner/bin/sonar-scanner"
   },
   "_moduleAliases": {
     "@daos": "dist/daos",
@@ -15,12 +17,14 @@
     "@server": "dist/Server"
   },
   "dependencies": {
+    "@types/keycloak-connect": "^4.5.1",
     "@types/multer": "^1.3.10",
     "cookie-parser": "^1.4.4",
     "cross-env": "^6.0.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "http-status-codes": "^1.4.0",
+    "keycloak-connect": "^8.0.1",
     "module-alias": "^2.2.2",
     "morgan": "^1.9.1",
     "multer": "^1.4.2",

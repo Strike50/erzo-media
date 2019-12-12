@@ -4,17 +4,19 @@ import { Request, Response } from 'express';
 import logger from 'morgan';
 import path from 'path';
 import BaseRouter from './routes';
+import {KeycloakMiddleware} from './shared/Keycloak';
 
 // Init express
 const app = express();
-
+const keycloak = KeycloakMiddleware.getInstance();
 // Add middleware/settings/routes to express.
+app.use(keycloak.middleware());
+app.use('', BaseRouter);
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('', BaseRouter);
 
 /**
  * Point express to the 'views' directory. If you're using a

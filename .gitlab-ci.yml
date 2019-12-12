@@ -1,7 +1,17 @@
-image: node:latest
+image: docker:19.03.1
+
+services:
+  - docker:19.03.1-dind
+
+variables:
+  # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_TLS_CERTDIR: "/certs"
 
 stages:
   - build
+  - test
+  - dockerbuild
   - sonardev
   - sonar
 
@@ -9,16 +19,29 @@ cache:
   paths:
     - node_modules/
 
-install_dependencies:
+build:
   stage: build
+  image: node:latest
+  script: npm i && npm run build
+
+test:
+  stage: test
+  image: node:latest
   script:
-    - npm install
-  artifacts:
-    paths:
-      - node_modules/
+    - npm run testgit
+
+dockerbuild:
+  stage: dockerbuild
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
 
 sonar-dev:
   stage: sonardev
+  image: node:latest
   script:
     - export SONAR_SCANNER_VERSION=4.0.0.1744
     - export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
@@ -35,6 +58,7 @@ sonar-dev:
 
 sonar:
   stage: sonar
+  image: node:latest
   script:
     - export SONAR_SCANNER_VERSION=4.0.0.1744
     - export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
