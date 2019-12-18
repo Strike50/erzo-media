@@ -85,7 +85,6 @@ router.delete('/:fileId', async (req: Request, res: Response) => {
         }
         return res.status(NO_CONTENT).send();
     });
-
 });
 
 /******************************************************************************
