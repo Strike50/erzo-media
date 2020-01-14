@@ -30,11 +30,11 @@ const CLIENT = pkgcloud.storage.createClient({
  *                      Get One Video - "GET /videos/{:id}"
  ******************************************************************************/
 
-router.get('/:fileId', async (req: Request, res: Response) => {
-    const {fileId} = req.params as ParamsDictionary;
+router.get('/:id', async (req: Request, res: Response) => {
+    const {id} = req.params as ParamsDictionary;
     const readStream = CLIENT.download({
         container: CONTAINER,
-        remote: fileId,
+        remote: id,
     });
     readStream.on('error', (err) => {
         res.status(BAD_REQUEST).json({
@@ -49,7 +49,7 @@ router.get('/:fileId', async (req: Request, res: Response) => {
  *                       Add One Video - "POST /videos"
  ******************************************************************************/
 
-router.post('', upload.single('imagePosted'), async (req: Request, res: Response) => {
+router.post('', upload.single('file'), async (req: Request, res: Response) => {
     const nameArray = req.file.originalname.split('.');
     const extension = '.'.concat(nameArray[nameArray.length - 1]);
     const readStream = require('streamifier').createReadStream(req.file.buffer);
@@ -75,9 +75,9 @@ router.post('', upload.single('imagePosted'), async (req: Request, res: Response
  *                    Delete One Video - "DELETE /videos/:id"
  ******************************************************************************/
 
-router.delete('/:fileId', async (req: Request, res: Response) => {
-    const { fileId } = req.params as ParamsDictionary;
-    await CLIENT.removeFile(CONTAINER, fileId, (err) => {
+router.delete('/:id', async (req: Request, res: Response) => {
+    const { id } = req.params as ParamsDictionary;
+    await CLIENT.removeFile(CONTAINER, id, (err) => {
         if (err) {
             res.status(BAD_REQUEST).json({
                 error: err,

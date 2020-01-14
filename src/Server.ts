@@ -3,14 +3,25 @@ import express from 'express';
 import { Request, Response } from 'express';
 import logger from 'morgan';
 import path from 'path';
+import cors from 'cors';
 import BaseRouter from './routes';
 import {KeycloakMiddleware} from './shared/Keycloak';
 
 // Init express
 const app = express();
-const keycloak = KeycloakMiddleware.getInstance();
 // Add middleware/settings/routes to express.
-app.use(keycloak.middleware());
+if (process.env.NODE_ENV === 'production') {
+    const allowedOrigins = ['http://erzo.wtf'];
+    app.use(cors({
+        origin: allowedOrigins,
+        exposedHeaders: 'Content-Location',
+    }));
+} else {
+    app.use(cors({
+        exposedHeaders: 'Content-Location',
+    }));
+}
+app.use(KeycloakMiddleware.getInstance().middleware());
 app.use('', BaseRouter);
 app.use(logger('dev'));
 app.use(express.json());
