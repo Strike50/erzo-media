@@ -11,7 +11,7 @@ import {KeycloakMiddleware} from './shared/Keycloak';
 const app = express();
 // Add middleware/settings/routes to express.
 if (process.env.NODE_ENV === 'production') {
-    const allowedOrigins = ['http://erzo.wtf'];
+    const allowedOrigins = ['http://erzo.wtf', 'http://localhost:3000'];
     app.use(cors({
         origin: allowedOrigins,
         exposedHeaders: 'Content-Location',
