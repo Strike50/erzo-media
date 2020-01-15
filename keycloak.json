@@ -1,5 +1,5 @@
 {
-  "realm": "master",
+  "realm": "Erzo",
   "auth-server-url": "http://keycloak.erzo.wtf/auth",
   "ssl-required": "external",
   "resource": "erzo-client",
